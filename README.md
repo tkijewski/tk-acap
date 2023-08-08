@@ -23,6 +23,7 @@ GCS_BUCKET_NAME=
 ## API
 
 `POST /v1/generate` - Will ask chatgpt for prompts, and submit one to replicate. The replicate webhook will be received and stored
+
 `POST /v1/get-challenge` - Will return a challenge from the db
 
 
