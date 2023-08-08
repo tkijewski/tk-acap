@@ -49,10 +49,10 @@ app.use(bodyParser.json());
 app.post('/v1/generate', async (req, res) => {
     
     const receivedData = req.body;
-    const numberOfSounds = receivedData.number_of_sounds || process.env.NUMBER_OF_SOUNDS_TO_GENERATE;
+    const numberOfPrompts = receivedData.number_of_prompts || process.env.NUMBER_OF_PROMPTS_TO_GENERATE;
 
     let result = await api.sendMessage('\
-    provide '+numberOfSounds+' distinctly unique short music descriptions with a title\
+    provide '+numberOfPrompts+' distinctly unique short music descriptions with a title\
 \
     add an element of randomness so they do not overlap\
     \
@@ -86,7 +86,7 @@ app.post('/v1/generate', async (req, res) => {
     obj.choices = soundsObject;
     obj.challenge_sound_url = '';
     obj.challenge_answer = randomKey;
-    obj.number_of_prompts = numberOfSounds;
+    obj.number_of_prompts = numberOfPrompts;
     obj.status = 'PENDING'; //PENDING, COMPLETE
     
     addDocumentToCollection(obj);
@@ -96,7 +96,7 @@ app.post('/v1/generate', async (req, res) => {
 
 /*
     { 
-      "number_of_sounds": 6,
+      "number_of_prompts": 6,
     }
 */
 app.post('/v1/get-challenge', async (req, res) => { 
@@ -105,8 +105,10 @@ app.post('/v1/get-challenge', async (req, res) => {
   // Reference to the challenges collection
   const challengesCollection = firestore.collection(process.env.COLLECTION_CHALLENGES);
 
+  let numberOfPrompts = receivedData.number_of_prompts || process.env.NUMBER_OF_PROMPTS_TO_GENERATE;
+
   // Query challenge
-  const querySnapshot = await challengesCollection.get();
+  const querySnapshot = await challengesCollection.where("number_of_prompts","=",numberOfPrompts).get();
   let keys = Object.keys(querySnapshot.docs);
   let randomKey = keys[Math.floor(Math.random() * keys.length)];
 
