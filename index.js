@@ -30,8 +30,8 @@ const api = new ChatGPTAPI({
   apiKey: process.env.OPENAI_KEY,
   completionParams: {
     model: process.env.CHATGPT_MODEL,
-    temperature: process.env.CHATGPT_TEMPERATURE || 0.5,
-    top_p: process.env.CHATGPT_TOP_P || 0.8,
+    temperature: parseFloat(process.env.CHATGPT_TEMPERATURE) || 0.5,
+    top_p: parseFloat(process.env.CHATGPT_TOP_P) || 0.8,
   }
 })
 
