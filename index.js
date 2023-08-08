@@ -38,8 +38,7 @@ const api = new ChatGPTAPI({
 
 
 app.get('/', (req, res) => {
-  const name = process.env.NAME || 'World';
-  res.send(`Hel11lo ${name}!`);
+  res.send('ACAP');
 });
 
 app.use(bodyParser.json());
@@ -184,7 +183,7 @@ app.post('/v1/receive-audio-challenge', async (req, res) => {
 
 const port = parseInt(process.env.PORT || 80);
 app.listen(port, () => {
-  console.log(`helloworld: listening on port ${port}`);
+  console.log(`listening on port ${port}`);
 });
 
 
