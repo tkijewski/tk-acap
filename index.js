@@ -30,8 +30,8 @@ const api = new ChatGPTAPI({
   apiKey: process.env.OPENAI_KEY,
   completionParams: {
     model: process.env.CHATGPT_MODEL,
-    temperature: 0.5,
-    top_p: 0.8
+    temperature: process.env.CHATGPT_TEMPERATURE || 0.5,
+    top_p: process.env.CHATGPT_TOP_P || 0.8,
   }
 })
 
@@ -108,7 +108,7 @@ app.post('/v1/get-challenge', async (req, res) => {
   let numberOfPrompts = receivedData.number_of_prompts || process.env.NUMBER_OF_PROMPTS_TO_GENERATE;
 
   // Query challenge
-  const querySnapshot = await challengesCollection.where("number_of_prompts","=",numberOfPrompts).get();
+  const querySnapshot = await challengesCollection.where("number_of_prompts","=",numberOfPrompts).where("status","=","COMPLETE").get();
   let keys = Object.keys(querySnapshot.docs);
   let randomKey = keys[Math.floor(Math.random() * keys.length)];
 
