@@ -19,3 +19,10 @@ GCS_BUCKET_NAME=
 ```
 ## Google Cloud Run
 - environment variables (above) must be set
+
+## API
+
+`POST /v1/generate` - Will ask chatgpt for prompts, and submit one to replicate. The replicate webhook will be received and stored
+`POST /v1/get-challenge` - Will return a challenge from the db
+
+
