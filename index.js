@@ -5,7 +5,7 @@ import express from 'express';
 import bodyParser from "body-parser";
 import { Firestore } from '@google-cloud/firestore';
 import { Storage } from '@google-cloud/storage';
-import { downloadFile, convertWavToMp3 } from "./utility.js";
+import { downloadFile, convertWavToMp3, addSilenceBeep } from "./utility.js";
 import fs from 'fs';
 
 const app = express();
@@ -13,12 +13,12 @@ const app = express();
 dotenv.config();
 
 const firestore = new Firestore({
-  //keyFilename: 'google-service-account.json',
+  keyFilename: 'google-service-account.json',
 });
 
 // Create a new storage client
 const storage = new Storage({
-  //keyFilename: 'google-service-account.json'
+  keyFilename: 'google-service-account.json'
 });
 
 
@@ -135,6 +135,7 @@ app.post('/v1/receive-audio-challenge', async (req, res) => {
       await downloadFile(wavUrl, downloadPath)
           .then(() => {
               console.log('File downloaded successfully.');
+              addSilenceBeep(downloadPath);
               return convertWavToMp3(downloadPath, outputPath);
           })
           .then(() => {
