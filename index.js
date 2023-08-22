@@ -98,13 +98,12 @@ app.post('/v1/generate', async (req, res) => {
       "number_of_prompts": 6,
     }
 */
-app.post('/v1/get-challenge', async (req, res) => { 
-  const receivedData = req.body;
+app.get('/v1/challenge', async (req, res) => { 
 
   // Reference to the challenges collection
   const challengesCollection = firestore.collection(process.env.COLLECTION_CHALLENGES);
 
-  let numberOfPrompts = receivedData.number_of_prompts || process.env.NUMBER_OF_PROMPTS_TO_GENERATE;
+  let numberOfPrompts = req.query.number_of_prompts || process.env.NUMBER_OF_PROMPTS_TO_GENERATE;
 
   // Query challenge
   const querySnapshot = await challengesCollection.where("number_of_prompts","=",numberOfPrompts).where("status","=","COMPLETE").get();
@@ -112,9 +111,40 @@ app.post('/v1/get-challenge', async (req, res) => {
   let randomKey = keys[Math.floor(Math.random() * keys.length)];
 
   let obj = querySnapshot.docs[randomKey];
-  res.json(obj.data());
+  let data = obj.data();
+  delete data.challenge_answer;
+  delete data.status;
+  delete data.updated_at;
+  delete data.replicate_id;
+  delete data.created_at;
+
+  res.json({
+      id: obj.id,
+      ...data
+  });
 
 });
+
+app.get('/v1/check-challenge', async (req, res) => { 
+  const challenge_id = req.query.id;
+
+  // Reference to the challenges collection
+  const challengesCollection = firestore.collection(process.env.COLLECTION_CHALLENGES);
+
+  // Query challenge
+  const querySnapshot = await challengesCollection.doc(challenge_id).get();
+  if (!querySnapshot.empty) {
+    res.json({
+      id: querySnapshot.id,
+      ...querySnapshot.data()
+  });
+  } else {
+      res.status(404).send('No challenge found');
+  }
+
+});
+
+
 
 //app.post('/v1/check-challenge', async (req, res) => { }
 
