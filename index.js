@@ -13,12 +13,12 @@ const app = express();
 dotenv.config();
 
 const firestore = new Firestore({
-  //keyFilename: 'google-service-account.json',
+  keyFilename: 'google-service-account.json',
 });
 
 // Create a new storage client
 const storage = new Storage({
-  //keyFilename: 'google-service-account.json'
+  keyFilename: 'google-service-account.json'
 });
 
 
@@ -161,20 +161,39 @@ app.post('/v1/receive-audio-challenge', async (req, res) => {
       const downloadPath = './'+receivedData.id+'.wav';
       const outputPath = './'+receivedData.id+'.mp3';
 
+      
+
       //download the wav file from replicate
-      await downloadFile(wavUrl, downloadPath)
+      /*await downloadFile(wavUrl, downloadPath)
           .then(() => {
               console.log('File downloaded successfully.');
-              addSilenceBeep(downloadPath);
-              return convertWavToMp3(downloadPath, outputPath);
+              var beepPosition = addSilenceBeep(downloadPath);
+              convertWavToMp3(downloadPath, outputPath);
+              return beepPosition;
           })
           .then(() => {
               console.log('Conversion complete.');
           })
           .catch(error => {
               console.error('Error:', error);
-          });
+          });*/
 
+          try {
+            await downloadFile(wavUrl, downloadPath);
+            console.log('File downloaded successfully.');
+        
+            var beepPosition = addSilenceBeep(downloadPath);
+        
+            await convertWavToMp3(downloadPath, outputPath);
+            console.log('Conversion complete.');
+        
+            // You can now use beepPosition here
+            console.log(beepPosition);
+        } catch (error) {
+            console.error('Error:', error);
+        }
+        console.log(beepPosition);
+          
           const localFilePath = outputPath;
           const destinationFileName = 'generated-audio/'+receivedData.id+'.mp3';
           
@@ -203,7 +222,8 @@ app.post('/v1/receive-audio-challenge', async (req, res) => {
       await challenge.update({
         challenge_sound_url: 'https://storage.cloud.google.com/'+process.env.GCS_BUCKET_NAME+'/'+destinationFileName,
         status: "COMPLETE",
-        updated_at: Math.floor(Date.now() / 1000)
+        updated_at: Math.floor(Date.now() / 1000),
+        beep_position: beepPosition
       });
       res.json({"result":"success"});
       return;
