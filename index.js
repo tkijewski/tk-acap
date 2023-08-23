@@ -88,8 +88,9 @@ app.post('/v1/generate', async (req, res) => {
     obj.number_of_prompts = numberOfPrompts;
     obj.status = 'PENDING'; //PENDING, COMPLETE
     
-    addDocumentToCollection(obj);
+    const docRef = await addDocumentToCollection(obj);
 
+    obj.id = docRef.id;
     res.json(obj);
 });
 
@@ -250,6 +251,8 @@ async function addDocumentToCollection(data) {
   try {
     const docRef = firestore.collection('challenges').doc();
     await docRef.set(data);
+
+    return docRef;
 
     console.log(`Document written with ID: ${docRef.id}`);
   } catch (error) {
