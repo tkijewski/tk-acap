@@ -54,8 +54,6 @@ export async function addSilenceBeep(inputPath, silenceSeconds=10, beepPosition)
         const deleteOldWavCommand = `rm ${inputPath}`;
         const renameGenCommand = `mv silence.wav ` + path.basename(inputPath);
 
-            
-
         execSync(silenceCommand, (error, stdout, stderr) => {
             if (error) {
                 console.error(`silenceCommand error: ${error}`);

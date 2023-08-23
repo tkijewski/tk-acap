@@ -104,13 +104,27 @@ app.get('/v1/challenge', async (req, res) => {
   const challengesCollection = firestore.collection(process.env.COLLECTION_CHALLENGES);
 
   let numberOfPrompts = req.query.number_of_prompts || process.env.NUMBER_OF_PROMPTS_TO_GENERATE;
+  let id = req.query.id;
 
   // Query challenge
-  const querySnapshot = await challengesCollection.where("number_of_prompts","=",numberOfPrompts).where("status","=","COMPLETE").get();
-  let keys = Object.keys(querySnapshot.docs);
-  let randomKey = keys[Math.floor(Math.random() * keys.length)];
+  let obj = null;
+  if (id) {
+    const querySnapshot = await challengesCollection.doc(id).get();
+    if (!querySnapshot.empty) {
+      obj = querySnapshot;
+    } else {
+        res.status(404).send('No challenge found');
+    }
+  }
+  
+  if (!obj) {
+    const querySnapshot = await challengesCollection.where("number_of_prompts","=",numberOfPrompts).where("status","=","COMPLETE").get();
+    let keys = Object.keys(querySnapshot.docs);
+    let randomKey = keys[Math.floor(Math.random() * keys.length)];
+    obj = querySnapshot.docs[randomKey];
+  }
 
-  let obj = querySnapshot.docs[randomKey];
+  
   let data = obj.data();
   delete data.challenge_answer;
   delete data.status;
