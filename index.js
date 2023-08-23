@@ -161,38 +161,32 @@ app.post('/v1/receive-audio-challenge', async (req, res) => {
       const downloadPath = './'+receivedData.id+'.wav';
       const outputPath = './'+receivedData.id+'.mp3';
 
+
+      //if file exists we need to delete, for whatever reason
+      try {
+        fs.unlinkSync(downloadPath);
+        fs.unlinkSync(outputPath);
+      } catch (err) {
+        console.error('Error:', err.message);
+      }
+      
       
 
       //download the wav file from replicate
-      /*await downloadFile(wavUrl, downloadPath)
+      let silenceSeconds = 10;
+      let beepPosition = Math.floor(Math.random() * silenceSeconds) + 1;
+      await downloadFile(wavUrl, downloadPath)
           .then(() => {
               console.log('File downloaded successfully.');
-              var beepPosition = addSilenceBeep(downloadPath);
-              convertWavToMp3(downloadPath, outputPath);
-              return beepPosition;
+              addSilenceBeep(downloadPath,silenceSeconds,beepPosition);
+              return convertWavToMp3(downloadPath, outputPath);
           })
           .then(() => {
               console.log('Conversion complete.');
           })
           .catch(error => {
               console.error('Error:', error);
-          });*/
-
-          try {
-            await downloadFile(wavUrl, downloadPath);
-            console.log('File downloaded successfully.');
-        
-            var beepPosition = addSilenceBeep(downloadPath);
-        
-            await convertWavToMp3(downloadPath, outputPath);
-            console.log('Conversion complete.');
-        
-            // You can now use beepPosition here
-            console.log(beepPosition);
-        } catch (error) {
-            console.error('Error:', error);
-        }
-        console.log(beepPosition);
+          });
           
           const localFilePath = outputPath;
           const destinationFileName = 'generated-audio/'+receivedData.id+'.mp3';
@@ -210,13 +204,13 @@ app.post('/v1/receive-audio-challenge', async (req, res) => {
           }
 
         //remove mp3
-        fs.unlink(outputPath, (err) => {
-          if (err) {
-              console.error('Error deleting the file:', err);
-              return;
-          }
-          console.log('File deleted successfully');
-        });
+        try {
+          fs.unlinkSync(outputPath);
+          fs.unlinkSync(downloadPath);
+        } catch (err) {
+          console.log(err);
+        }
+        
       
         //update firstore
       await challenge.update({
