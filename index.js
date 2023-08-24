@@ -127,11 +127,6 @@ app.get('/v1/challenge', async (req, res) => {
 
   
   let data = obj.data();
-  delete data.challenge_answer;
-  delete data.status;
-  delete data.updated_at;
-  delete data.replicate_id;
-  delete data.created_at;
 
   res.json({
       id: obj.id,
@@ -141,27 +136,49 @@ app.get('/v1/challenge', async (req, res) => {
 });
 
 app.get('/v1/check-challenge', async (req, res) => { 
+
+  if (!req.query.id) {
+    return res.status(400).send('ID required');
+  }
+
+  if (!req.query.beep_position) {
+    return res.status(400).send('Beep location required');
+  }
+
+  if (!req.query.prompt_guess) {
+    return res.status(400).send('Prompt guess required');
+  }
+
   const challenge_id = req.query.id;
+  const beep_position = req.query.beep_position;
+  const prompt_guess = req.query.prompt_guess;
 
   // Reference to the challenges collection
   const challengesCollection = firestore.collection(process.env.COLLECTION_CHALLENGES);
 
   // Query challenge
   const querySnapshot = await challengesCollection.doc(challenge_id).get();
-  if (!querySnapshot.empty) {
-    res.json({
-      id: querySnapshot.id,
-      ...querySnapshot.data()
-  });
+  if (querySnapshot.exists) {
+    const challengeData = querySnapshot.data();
+    const beepPositionCorrect = validateBeepBasedOnChallenge(challengeData,beep_position);
+    const promptGuessCorrect = validatePromptGuessBasedOnChallenge(challengeData,prompt_guess);
+
+    let obj = {};
+    //obj.beep_position_success = beepPositionCorrect;
+    //obj.prompt_guess_success = promptGuessCorrect;
+
+    obj.success = beepPositionCorrect && promptGuessCorrect;
+
+    return res.status(200).json(obj);
+
   } else {
-      res.status(404).send('No challenge found');
+      return res.status(404).send('Challenge not found');
   }
 
 });
 
 
 
-//app.post('/v1/check-challenge', async (req, res) => { }
 
 app.post('/v1/receive-audio-challenge', async (req, res) => { 
   const receivedData = req.body;
@@ -277,4 +294,26 @@ async function searchByReplicateId(id) {
   } catch (error) {
     console.error('Error querying challenge: ', error);
   }
+}
+
+
+function validateBeepBasedOnChallenge(challengeData, beepPosition)
+{
+  const expectedBeepPosition = challengeData.beep_position; //in seconds
+  const providedBeepPosition = beepPosition; //in seconds
+
+  const beepPositionVariance = Math.abs(expectedBeepPosition-providedBeepPosition);
+
+  if (beepPositionVariance <= 1) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+function validatePromptGuessBasedOnChallenge(challengeData, prompt_guess)
+{
+  const expectedPromptGuess = challengeData.challenge_answer;
+
+  return expectedPromptGuess == prompt_guess;
 }
