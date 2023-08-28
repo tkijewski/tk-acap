@@ -24,6 +24,8 @@ GCS_BUCKET_NAME=
 
 `POST /v1/generate` - Will ask chatgpt for prompts, and submit one to replicate. The replicate webhook will be received and stored
 
-`POST /v1/get-challenge` - Will return a challenge from the db
+`GET /v1/challenge` - Will return a new challenge from the db
+
+`GET /v1/check-challenge?id=1ona1tbz3CqzAHHGshHx&beep_position=2&prompt_guess=3` - Check the challenge
 
 
