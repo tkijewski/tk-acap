@@ -338,7 +338,7 @@ app.post('/v1/receive-audio-challenge', async (req, res) => {
       
         //update firstore
       await challenge.update({
-        challenge_sound_url: 'https://storage.cloud.google.com/'+process.env.GCS_BUCKET_NAME+'/'+destinationFileName,
+        challenge_sound_url: 'https://storage.googleapis.com/'+process.env.GCS_BUCKET_NAME+'/'+destinationFileName,
         status: "COMPLETE",
         updated_at: Math.floor(Date.now() / 1000),
         beep_position: beepPosition
