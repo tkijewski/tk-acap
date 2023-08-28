@@ -13,12 +13,12 @@ const app = express();
 dotenv.config();
 
 const firestore = new Firestore({
- // keyFilename: 'google-service-account.json',
+  //keyFilename: 'google-service-account.json',
 });
 
 // Create a new storage client
 const storage = new Storage({
-//  keyFilename: 'google-service-account.json'
+  //keyFilename: 'google-service-account.json'
 });
 
 
@@ -91,7 +91,7 @@ app.post('/v1/generate', async (req, res) => {
     const docRef = await addDocumentToCollection(obj);
 
     obj.id = docRef.id;
-    res.json(obj);
+    return res.json(obj);
 });
 
 /*
@@ -109,10 +109,12 @@ app.get('/v1/challenge', async (req, res) => {
 
   // Query challenge
   let obj = null;
+  let data = null;
   if (id) {
     const querySnapshot = await challengesCollection.doc(id).get();
     if (!querySnapshot.empty) {
       obj = querySnapshot;
+      data = obj.data();
     } else {
         res.status(404).send('No challenge found');
     }
@@ -123,17 +125,107 @@ app.get('/v1/challenge', async (req, res) => {
     let keys = Object.keys(querySnapshot.docs);
     let randomKey = keys[Math.floor(Math.random() * keys.length)];
     obj = querySnapshot.docs[randomKey];
+    
+    data = obj.data();
+    delete data.replicate_id;
+    delete data.created_at;
+    delete data.challenge_answer;
+    delete data.updated_at;
+    delete data.beep_position;
+    delete data.status;
+    delete data.start_play;
   }
 
-  
-  let data = obj.data();
-
-  res.json({
+  return res.json({
       id: obj.id,
       ...data
   });
 
 });
+
+app.post('/v1/challenge/:id/play', async (req, res) => { 
+
+  // Reference to the challenges collection
+  const challengesCollection = firestore.collection(process.env.COLLECTION_CHALLENGES);
+
+  let id = req.params.id;
+
+  // Query challenge
+  let obj = null;
+    const querySnapshot = await challengesCollection.doc(id).get();
+    if (querySnapshot.exists) {
+      obj = challengesCollection.doc(id);
+    } else {
+        return res.status(404).send('No challenge found');
+    }
+
+  if (typeof querySnapshot.data().start_play === 'number') {
+      return res.json({
+        id: obj.id,
+        error: "already playing!"
+      });
+  } else {
+
+    let startPlayTime = Math.floor(Date.now() / 1000);
+    await obj.update({
+      start_play: startPlayTime
+    });
+  
+    return res.json({
+        id: obj.id,
+        start_play: startPlayTime
+    });
+  }
+  
+
+});
+
+app.post('/v1/challenge/:id/beep', async (req, res) => { 
+
+  // Reference to the challenges collection
+  const challengesCollection = firestore.collection(process.env.COLLECTION_CHALLENGES);
+
+  let id = req.params.id;
+
+  // Query challenge
+  let obj = null;
+  const querySnapshot = await challengesCollection.doc(id).get();
+  if (querySnapshot.exists) {
+    obj = challengesCollection.doc(id);
+    var data = querySnapshot.data();
+  } else {
+      return res.status(404).send('No challenge found');
+  }
+
+  if (typeof data.start_play !== 'number') {
+      return res.json({
+        id: obj.id,
+        error: "Not playing!"
+      });
+  }
+
+  let startPlayTime = data.start_play;
+  let expectedBeepTime = startPlayTime + data.beep_position;
+  let now = Math.floor(Date.now() / 1000);
+
+  if (Math.abs(now-expectedBeepTime) <= 1) {
+    res.json({
+      id: obj.id,
+      success: true
+    });
+  } else {
+    res.json({
+      id: obj.id,
+      success: false
+    });
+  }
+
+  await obj.update({
+    start_play: null
+  });
+
+});
+
 
 app.get('/v1/check-challenge', async (req, res) => { 
 
