@@ -13,12 +13,12 @@ const app = express();
 dotenv.config();
 
 const firestore = new Firestore({
-  //keyFilename: 'google-service-account.json',
+ // keyFilename: 'google-service-account.json',
 });
 
 // Create a new storage client
 const storage = new Storage({
-  //keyFilename: 'google-service-account.json'
+//  keyFilename: 'google-service-account.json'
 });
 
 
@@ -119,7 +119,7 @@ app.get('/v1/challenge', async (req, res) => {
   }
   
   if (!obj) {
-    const querySnapshot = await challengesCollection.where("number_of_prompts","=",numberOfPrompts).where("status","=","COMPLETE").get();
+    const querySnapshot = await challengesCollection.where("number_of_prompts","=",Number(numberOfPrompts)).where("status","=","COMPLETE").get();
     let keys = Object.keys(querySnapshot.docs);
     let randomKey = keys[Math.floor(Math.random() * keys.length)];
     obj = querySnapshot.docs[randomKey];
@@ -317,3 +317,12 @@ function validatePromptGuessBasedOnChallenge(challengeData, prompt_guess)
 
   return expectedPromptGuess == prompt_guess;
 }
+
+
+//request
+
+//PLAY START
+
+//bell ring time
+
+//prompt answer
