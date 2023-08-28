@@ -119,7 +119,7 @@ app.get('/v1/challenge', async (req, res) => {
   }
   
   if (!obj) {
-    const querySnapshot = await challengesCollection.where("number_of_prompts","=",Number(numberOfPrompts)).where("status","=","COMPLETE").get();
+    const querySnapshot = await challengesCollection.where("number_of_prompts","=",numberOfPrompts).where("status","=","COMPLETE").get();
     let keys = Object.keys(querySnapshot.docs);
     let randomKey = keys[Math.floor(Math.random() * keys.length)];
     obj = querySnapshot.docs[randomKey];
