@@ -26,10 +26,12 @@ GCS_BUCKET_NAME=
 
 `GET /v1/challenge` - Will return a new challenge from the db
 
-`POST /v1/challenge/1ona1tbz3CqzAHHGshHx/play` - Will start the playing counter in the background
+`POST /v1/challenge/:challenge_id/play` - Will start the playing counter in the background
 
-`POST /v1/challenge/1ona1tbz3CqzAHHGshHx/beep` - Will return if beep is timed right. will reset play counter regardless of result (for now)
+`POST /v1/challenge/:challenge_id/beep` - Will return if beep is timed right. will reset play counter regardless of result (for now)
 
-`GET /v1/check-challenge?id=1ona1tbz3CqzAHHGshHx&beep_position=2&prompt_guess=3` - Check the challenge
+`POST /v1/challenge/:challenge_id/answer/:answer` - Check answer
+
+`##### DEPRECATED: GET /v1/check-challenge?id=1ona1tbz3CqzAHHGshHx&beep_position=2&prompt_guess=3` - Check the challenge
 
 
