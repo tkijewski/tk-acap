@@ -226,6 +226,47 @@ app.post('/v1/challenge/:id/beep', async (req, res) => {
 
 });
 
+app.post('/v1/challenge/:id/answer/:answer', async (req, res) => { 
+
+  // Reference to the challenges collection
+  const challengesCollection = firestore.collection(process.env.COLLECTION_CHALLENGES);
+
+  let id = req.params.id;
+  let answer = req.params.answer;
+
+  // Query challenge
+  let obj = null;
+  const querySnapshot = await challengesCollection.doc(id).get();
+  if (querySnapshot.exists) {
+    obj = challengesCollection.doc(id);
+    var data = querySnapshot.data();
+  } else {
+      return res.status(404).send('No challenge found');
+  }
+
+  if (typeof data.start_play !== 'number') {
+    return res.json({
+      id: obj.id,
+      success: false
+    });
+  }
+
+  let correctAnswer = data.challenge_answer;
+
+  if (Number(correctAnswer) === Number(answer)) {
+    return res.json({
+      id: obj.id,
+      success: true
+    });
+  } else {
+    return res.json({
+      id: obj.id,
+      success: false
+    });
+  }
+
+});
+
 
 app.get('/v1/check-challenge', async (req, res) => { 
 
