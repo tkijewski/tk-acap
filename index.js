@@ -244,12 +244,12 @@ app.post('/v1/challenge/:id/answer/:answer', async (req, res) => {
       return res.status(404).send('No challenge found');
   }
 
-  if (typeof data.start_play !== 'number') {
+  /*if (typeof data.start_play !== 'number') { //TODO: figure out how to maintain session for answer
     return res.json({
       id: obj.id,
       success: false
     });
-  }
+  }*/
 
   let correctAnswer = data.challenge_answer;
 
