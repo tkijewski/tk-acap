@@ -7,8 +7,10 @@ import { Firestore } from '@google-cloud/firestore';
 import { Storage } from '@google-cloud/storage';
 import { downloadFile, convertWavToMp3, addSilenceBeep } from "./utility.js";
 import fs from 'fs';
+import cors from 'cors';
 
 const app = express();
+app.use(cors());
 
 dotenv.config();
 
