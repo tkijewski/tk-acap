@@ -15,12 +15,12 @@ app.use(cors());
 dotenv.config();
 
 const firestore = new Firestore({
-  keyFilename: 'google-service-account.json',
+ // keyFilename: 'google-service-account.json',
 });
 
 // Create a new storage client
 const storage = new Storage({
-  keyFilename: 'google-service-account.json'
+  //keyFilename: 'google-service-account.json'
 });
 
 
