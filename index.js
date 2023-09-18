@@ -210,7 +210,7 @@ app.post('/v1/challenge/:id/beep', async (req, res) => {
   let expectedBeepTime = startPlayTime + data.beep_position;
   let now = Math.floor(Date.now() / 1000);
 
-  if ((expectedBeepTime - now) > 0 && (expectedBeepTime - now) <= 1.5) {
+  if ((now - expectedBeepTime) >= 0 && (now - expectedBeepTime) < 2) {
     res.json({
       id: obj.id,
       success: true
